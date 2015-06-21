@@ -9,6 +9,11 @@ Bug reports, feature ideas, comments, questions are welcome in the repo!
 https://github.com/csomakk/sharedboard.net/tree/master/releases
 Sharedboard is multiplatform! Mac, Windows, Linux, Android, BlackBerry, --iOS-- 
 
+# Screenshots
+https://plus.google.com/photos/+Csom%C3%A1kG%C3%A1bor/albums/5631728473361068353
+![alt tag](https://lh6.googleusercontent.com/-tUn-Fljp1Is/TifrWV_HCfI/AAAAAAAAEaI/8rM4CNx_dQg/w1617-h951-no/sc5.PNG)
+
+
 # Future plans
 Rewriting it in WebRTC
 Supporters needed!
