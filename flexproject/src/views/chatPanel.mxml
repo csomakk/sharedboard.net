@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Panel xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 creationComplete="panel1_creationCompleteHandler(event)"
+		 width="300" height="95" backgroundColor="0x464646" title="chat sending panel">
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			
+			protected function send():void {
+				FlexGlobals.topLevelApplication.p2pConn.sendChatMessage(chatInput.text);
+				PopUpManager.removePopUp(this);
+			}
+			
+			protected function chatInput_keyDownHandler(event:KeyboardEvent):void {
+				if(event.keyCode == Keyboard.ENTER){
+					send();
+				}
+			}
+			
+			protected function panel1_creationCompleteHandler(event:FlexEvent):void {
+				width = stage.stageWidth;
+				if(stage.stageWidth > 500) {
+					width *= 0.8
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:TextInput keyDown="chatInput_keyDownHandler(event)" id="chatInput" left="10" right="77" top="10" bottom="10"/>
+	<s:Button id="sendBtn" right="10" top="10" bottom="10" width="59" label="send"
+			  click="send()"/>
+	<s:Image right="0" top="-30" width="30" height="30" click="PopUpManager.removePopUp(this)"
+			 id="closeBtn"
+			 smooth="true" source="icons/1314286165_button_red_close.png"/>
+</s:Panel>

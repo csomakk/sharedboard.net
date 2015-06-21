@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Panel xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 creationComplete="panel1_creationCompleteHandler(event)"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 width="100%" height="100%" backgroundColor="0x464646" title="Help, terms">
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			
+			protected function panel1_creationCompleteHandler(event:FlexEvent):void {
+				width=stage.stageWidth;
+				height=stage.stageHeight;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:TextArea left="10" right="10" top="10" bottom="10" editable="false" fontWeight="normal"
+				text="Welcome!&#xd;If you have ideas, feature requests, bugreports please e-mail to: csomakk@gmail.com&#xd;You can install this app on your pc, mac, and mobile phones, and the Playbook as well! Download it from www.sharedboard.net&#xd;Have fun with this application, and enjoy it: Gábor Csomák, the creator&#xd;&#xd;&#xd;FAQs:&#xd;I cannot connect/cannot see anyone. Why?&#xd;Unfortunately -as it is a P2P app- some firewalls block the connection. Make sure that no firewall is banning the ports similar to 50.57.90.134 :1935 and 192.168.56.1 :54305. Remember to give the same group name on every device you want to connect, and the server will connect you.&#xd;&#xd;How to change color and size? &#xd;You can long-press or right-click for the small menu. You can Swipe_down on playbook, or use the small menu to get the full menu. There is a custom color icon, and there you can change size, and select the color you want in RGB.&#xd;&#xd;What about security? &#xd;Because passwords can be stolen, forgotten, or cracked easily by an expert, I've decided not to bother with them. Instead, you can view, how many people can actually see the conversation. It is marked as an approximation, but under 5 it is perfectly accurate. However, a good hacker can still trick the system. Remember, if someone joins, he/she won't see the previously drawn and sent messages, only a clean, black board.How does it work?  T&#xd;&#xd;The program is written in Adobe Flex (yes, it runs on Adobe Flash platform, even on iOS), complied from the same project for each target platforms. The connection is 'centralised peer-to-peer', so when you enter a group name, it will ask the Adobe Cirrus server for the participiants in the group, and from then, you only connect via p2p. &#xd;&#xd;&#xd;About the author&#xd;Gábor Csomák, 21, is a student at TU Budapest, editor of ffdmag.com, programmer of TU Budapest Formula Racing Team, and rugby player at Budapest Bears.&#xd;&#xd;&#xd;Help:&#xd;The blackboard is shared with all users in the same group. So if you draw something to the board, it'll show on everyone's board in the group. &#xd;You can zoom via multitouch gestures, or mouse wheel.&#xd;It is yet not possible to secure a group's board with a password, so if someone else guesses the group name, he/she can see what you draw, so please don't share your pivate infos in the chat, or on the board. However, the longer the groupname is, the less likely that someone unwanted will join the group.&#xd;There is no administrator role, everyone can draw on any board, and join any group.&#xd;If you join a group, it's only for that session. If someone (even you) joins the group, he/she can't see what has already been drawn to the board, he/she will see a clean board.&#xd;Since it is a p2p app, you can't be certain how many clients are in the group, but the estimate is shown on the bottom right corner.&#xd;If you cannot connect to a partner, it can be caused by firewalls or other networking issues.&#xd;&#xd;&#xd;About Internet Connection:&#xd;The application uses peer to peer internet connection, everything you draw and insert to the board will be uploaded, and everything &#xd;someone else in the group draws, will be downloaded.. So please make sure you know the billing of your internet connection. However, if you leave the group empty, or select offline mode, it won't connect to the internet.&#xd;&#xd;Terms of Service:&#xd;The application comes as is. There is no warranty on availability of server, or any other part. I cannot guarantee safety of childrens, as anybody can chat about anything, even draw some nasty stuff on the board. The application was made for education and fun, but people may use it to troll, advertise, or just annoy people. I disclaim all liability for content and communication made through this application.&#xd;&#xd;&#xd;&#xd;&#xd;&#xd;Have fun!&#xd;&#xd;&#xd;"/>
+	<s:Button right="10" bottom="10" label="Back" click="PopUpManager.removePopUp(this);"/>
+	<s:Image right="0" top="-30" width="30" height="30" click="PopUpManager.removePopUp(this)"
+			 id="closeBtn"
+			 smooth="true" source="icons/1314286165_button_red_close.png"/>
+</s:Panel>

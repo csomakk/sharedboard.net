@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Panel xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 width="752" height="600" creationComplete="panel1_creationCompleteHandler(event)"
+		 title="sharedboard.net menu">
+	
+	<fx:Script>
+		<![CDATA[
+			import CsUtils.CsUtils;
+			
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			import mx.graphics.ImageSnapshot;
+			import mx.graphics.codec.PNGEncoder;
+			import mx.managers.PopUpManager;
+			
+			import spark.components.Image;
+			
+			protected var board:Board=FlexGlobals.topLevelApplication.homeView.boardHolder.board;
+			
+			protected var cameraUIom:CameraUI;
+			protected var cameraRollom:CameraRoll
+			protected var cameram:Camera
+			protected var loader:Loader=new Loader();
+			protected var visCompHand:visualComponentHandler=new visualComponentHandler()
+				
+			protected function resetButton_clickHandler(event:MouseEvent):void {
+				board.resetBoard(); 
+				//ide jöhet majd alert
+				FlexGlobals.topLevelApplication.p2pConn.sendClearMessage();
+			}
+			
+			protected function customBrush_clickHandler(event:MouseEvent):void {
+				PopUpManager.centerPopUp(PopUpManager.createPopUp(this, colorpicker, true));
+				PopUpManager.removePopUp(this)
+			}
+			
+			protected function saveAsImage_clickHandler(event:MouseEvent):void {
+				
+				
+				if(CameraRoll.supportsAddBitmapData){
+					cameraRollom=new CameraRoll();
+					var imagesn:ImageSnapshot=ImageSnapshot.captureImage(FlexGlobals.topLevelApplication.homeView.boardHolder)
+					var loader : Loader = new Loader();
+					
+					loader.contentLoaderInfo.addEventListener(Event.COMPLETE, getBitmapData);
+					loader.loadBytes(imagesn.data);
+					
+					function getBitmapData(e:Event):void{
+						var content:*=loader.content;
+						var image:Bitmap = Bitmap(content); 
+						/** get the bitmapdata **/
+						var bitmap:BitmapData = image.bitmapData
+						cameraRollom.addBitmapData(bitmap)
+					}
+					
+					
+						
+				} else {
+					var image:ImageSnapshot = ImageSnapshot.captureImage(FlexGlobals.topLevelApplication.homeView.boardHolder, 300, new PNGEncoder());
+					var file:FileReference = new FileReference();
+					var date:Date=new Date();
+					var month:String=date.getMonth()+1+""
+					if (date.getMonth()<9) month="0"+month;
+					var day:String=date.getDate()+"";
+					if(date.getDate()) day="0"+day
+					file.save(image.data, "SharedBoard"+date.getFullYear()+month+day+".png");
+				}
+			}
+			
+			protected function addTextButton1_clickHandler(event:MouseEvent):void {
+				PopUpManager.centerPopUp(PopUpManager.createPopUp(this, addText, true));
+				PopUpManager.removePopUp(this)		
+				
+			}
+			
+			protected function fontSizeSlider_changeHandler(event:Event):void{
+				FlexGlobals.topLevelApplication.homeView.recieve.setStyle("fontSize", fontSizeSlider.value)//chat font size
+				var xml:XML=new XML(
+					"<settings>"+"<font>"+fontSizeSlider.value+"</font>"+"</settings>")
+				
+				new CsUtils().saveAsXML(xml, File.applicationStorageDirectory.resolvePath("settings.xml").nativePath)
+			}
+			
+			protected function fontSizeSlider_creationCompleteHandler(event:FlexEvent):void {
+				fontSizeSlider.value=FlexGlobals.topLevelApplication.homeView.recieve.getStyle('fontSize');
+			}
+			
+			public function addPictButton1_clickHandler(event:MouseEvent):void {
+				PopUpManager.removePopUp(this)	
+				if(CameraRoll.supportsBrowseForImage){
+					cameraRollom=new CameraRoll();
+					cameraRollom.addEventListener(MediaEvent.SELECT, onMediaSelect);
+					cameraRollom.browseForImage()
+						
+					function onMediaSelect(e:MediaEvent):void{
+						var promise:MediaPromise=e.data
+						loader.loadFilePromise(promise)
+						loader.contentLoaderInfo.addEventListener(Event.COMPLETE, imageContentLoaderComplete);
+						FlexGlobals.topLevelApplication.homeView.addElement(visCompHand);
+						visCompHand.toMove.addChild(loader);
+					}
+				} else {
+				
+					var imagesFilter:FileFilter = new FileFilter("Images", "*.jpg;*.gif;*.png;*.swf;");
+					var imageFile:File = new File();
+					//var img:spark.components.Image=new spark.components.Image()
+					imageFile.browseForOpen("Select an Image", [imagesFilter]);
+					imageFile.addEventListener(Event.SELECT, imageSelected2);
+					
+					function imageSelected2(e:Event):void{
+						//img.source = imageFile.url;
+						imageSelected(e.target as File);
+						
+					}
+				}
+				
+			}
+			
+			protected function imageSelected(imageFile:File):void{
+				loader.load(new URLRequest(imageFile.url));
+				loader.contentLoaderInfo.addEventListener(Event.COMPLETE, imageContentLoaderComplete);
+				FlexGlobals.topLevelApplication.homeView.addElement(visCompHand);
+				visCompHand.toMove.addChild(loader);
+			}
+			
+			protected function imageContentLoaderComplete(e:Event):void{
+				if(loader.width>500 || loader.height>500) {
+					var oszto:Number=loader.height;
+					if(loader.width>oszto) oszto=loader.width
+					oszto/=500	
+					loader.width/=oszto;
+					loader.height/=oszto;
+					visCompHand.upDateButtonPoses();
+				}
+			}
+			
+			protected function smoothSlider_changeHandler(event:Event):void {
+				FlexGlobals.topLevelApplication.homeView.boardHolder.board.smoothing=smoothingSlider0.value
+			}
+			
+			protected function smoothingSlider0_creationCompleteHandler(event:FlexEvent):void {
+				smoothingSlider0.value=FlexGlobals.topLevelApplication.homeView.boardHolder.board.smoothing
+			}
+			
+			protected function addShotButton1_clickHandler(event:MouseEvent):void {
+				//http://tv.adobe.com/watch/adc-presents/developing-for-ios-with-air-for-mobile-26/
+				PopUpManager.removePopUp(this)	
+				if(CameraUI.isSupported){
+					cameraUIom=new CameraUI()
+					cameraUIom.addEventListener(MediaEvent.COMPLETE, onCameraComplete)
+					cameraUIom.launch(MediaType.IMAGE)
+				}
+			}
+			
+			protected function onCameraComplete(event:MediaEvent):void {
+				imageSelected(event.data.file)
+			}
+			
+			protected function panel1_creationCompleteHandler(event:FlexEvent):void {
+				width=stage.stageWidth;
+				height=stage.stageHeight
+				/* if(stage.stageWidth>500){
+					width*=0.8
+					height*=0.8
+				} */
+				trace(stage.width)
+				
+				
+			}
+			
+			
+			
+		]]>
+	</fx:Script>
+
+	<s:Scroller left="0" right="0" top="0" bottom="0">
+		<s:Group>
+			<s:VGroup left="10" right="10" top="10" bottom="10">
+				<s:HGroup width="100%">
+					<s:VGroup>
+						<s:Label text="Brushes:"/>
+						<s:HGroup width="100%">
+							<s:Image x="10" y="33" width="60" height="60"
+									 click="board.setLineStyle(3,0xFFFFFF); PopUpManager.removePopUp(this)"
+									 smooth="true" source="icons/1350074132_Circle_Grey.png"/>
+							<s:Image x="88" y="33" width="60" height="60"
+									 click="board.setLineStyle(3,0xFF0000); PopUpManager.removePopUp(this)"
+									 smooth="true" source="icons/1350074113_Circle_Red.png"/>
+							<s:Image x="166" y="33" width="60" height="60"
+									 click="board.setLineStyle(3,0x00FF00); PopUpManager.removePopUp(this)"
+									 smooth="true" source="icons/1350074311_Circle_Green.png"/>
+							<s:Image x="244" y="33" width="60" height="60"
+									 click="board.setLineStyle(3,0x0000FF); PopUpManager.removePopUp(this)"
+									 smooth="true" source="icons/1350074138_Circle_Blue.png"/>
+							<s:Image x="322" y="33" width="60" height="60"
+									 click="board.setLineStyle(3,0xFFFF66); PopUpManager.removePopUp(this);"
+									 smooth="true" source="icons/1350074279_Circle_Yellow.png"/>
+							<s:Button id="customBrush" x="400" y="34" width="90" height="69" label="Custom"
+									  click="customBrush_clickHandler(event)" icon="icons/1314282524_colorpicker.png"/>
+						</s:HGroup>
+					</s:VGroup>
+					<s:VGroup x="476" y="10">
+						<s:Label x="500" y="10" text="Clean:"/>
+						<s:HGroup>
+							<s:Button x="498" y="33" width="96" height="70" label="Sponge"
+									  click="board.setLineStyle(20,0x000000); PopUpManager.removePopUp(this);"
+									  icon="icons/1314206834_Soap.png"/>
+							<s:Button x="602" y="33" width="71" height="70" label="Reset" iconPlacement="right"
+									  click="resetButton_clickHandler(event); PopUpManager.removePopUp(this);"
+									  icon="icons/1309344798_document_res.png"/>
+						</s:HGroup>
+					</s:VGroup>
+				</s:HGroup>
+				<s:VGroup width="100%">
+					<s:Label text="Else:"/>
+					<s:TileGroup id="tileGroup" width="100%" rowHeight="60">
+						<s:Button id="tilebutton" label="Add Text" click="addTextButton1_clickHandler(event)"/>
+						<s:Button label="Add Pict" click="addPictButton1_clickHandler(event)"/>
+						<s:Button id="saveAsImage" click="saveAsImage_clickHandler(event)" label="Save board as image"/>
+						<s:Button id="addShot" label="Add Shot" click="addShotButton1_clickHandler(event)" />
+					</s:TileGroup>
+				</s:VGroup>
+				<s:HGroup width="100%">
+					<s:Label height="100%" text="Font Size:" width="{smoothingLabel.width}" verticalAlign="middle"/>
+					<s:HSlider id="fontSizeSlider" width="100%"
+							   change="fontSizeSlider_changeHandler(event)"
+							   creationComplete="fontSizeSlider_creationCompleteHandler(event)"
+							   maximum="24" minimum="6" value="16"/>
+				</s:HGroup>
+				
+				<s:HGroup width="100%">
+					<s:Label id="smoothingLabel" height="100%" text="Smoothing:"
+							 verticalAlign="middle"/>
+					<s:HSlider id="smoothingSlider0" width="100%"
+							   change="smoothSlider_changeHandler(event)"
+							   creationComplete="smoothingSlider0_creationCompleteHandler(event)"
+							   maximum="10" minimum="1" stepSize="1"/>
+				</s:HGroup>
+				
+				<s:HGroup x="-12" y="251" width="100%" height="100%">
+					<s:TextArea left="10" right="175" bottom="10" width="100%" height="100%"
+								editable="false"
+								text="At www.sharedboard.net you can\n download the desktop version as well."
+								verticalAlign="bottom"/>
+					<s:Button right="10" bottom="10" label="Help"
+							  click="PopUpManager.centerPopUp(PopUpManager.createPopUp(this, helpPanel, true) )"
+							  icon="icons/1309344906_system-help_res.png"/>
+				</s:HGroup>
+			</s:VGroup>
+			
+			
+			
+			
+			
+			<s:Image right="0" top="-30" width="30" height="30" click="PopUpManager.removePopUp(this)"
+					 smooth="true" source="icons/1314286165_button_red_close.png"/>
+			
+			
+		</s:Group>
+	</s:Scroller>
+	<s:Image right="0" top="-30" width="30" height="30" click="PopUpManager.removePopUp(this)"
+			 id="closeBtn"
+			 smooth="true" source="icons/1314286165_button_red_close.png"/>
+	
+</s:Panel>

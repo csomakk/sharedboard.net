@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		xmlns:s="library://ns.adobe.com/flex/spark" 
+		xmlns:views="views.*"
+		creationComplete="group1_creationCompleteHandler(event)">
+	<fx:Script>
+		<![CDATA[
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			
+			protected function group1_creationCompleteHandler(event:FlexEvent):void {
+				
+				board.scaleX = board.scaleY = FlexGlobals.topLevelApplication.width / board.width * 4;
+				if(board.scaleX > 1) {
+					board.scaleX=board.scaleY=1 
+				}
+					
+				if(Multitouch.supportsGestureEvents) {
+					addEventListener( TransformGestureEvent.GESTURE_ZOOM, onGesture );
+					addEventListener( TransformGestureEvent.GESTURE_PAN, onGesture );
+					addEventListener( TransformGestureEvent.GESTURE_ROTATE, onGesture);
+				} else {
+					trace("BoardHolder: No gestures will be available")
+					addEventListener(MouseEvent.MOUSE_WHEEL, onWheel);
+				}
+			}
+			
+			private function onGesture( event : TransformGestureEvent ) : void {
+				board.removeDownListeners();
+				
+				if ( event.type == TransformGestureEvent.GESTURE_PAN ) {
+					board.x += event.offsetX;
+					board.y += event.offsetY;
+					
+				}
+				
+				if( event.type == TransformGestureEvent.GESTURE_ZOOM) {
+					board.scaleX *= event.scaleX;
+					board.scaleY *= event.scaleX;
+					
+					if(board.scaleX > 1) {
+						board.scaleX = 1;
+						board.scaleY = 1
+					}
+				}
+			}
+			
+			protected function onWheel(event:MouseEvent):void {
+				
+				var multiplier:Number = 1.1;
+				
+				if(event.delta < 0) {
+					multiplier = 1 / multiplier;
+				}
+				
+				var transformedVector:Point = new Point( (event.stageX-board.x)*multiplier, (event.stageY-board.y)*multiplier );
+				
+				if(multiplier < 1 || board.scaleX < 0.95) { 
+				
+					board.x = event.stageX-( transformedVector.x);
+					board.y = event.stageY-( transformedVector.y);
+					board.scaleX *= multiplier;
+					board.scaleY *= multiplier;
+										
+				}
+				if(board.scaleX > 1) {
+					board.scaleX = 1;
+					board.scaleY = 1
+				}
+				
+				var toplevel:DisplayObject=FlexGlobals.topLevelApplication as DisplayObject;
+				if(board.scaleX < toplevel.width / board.width) {
+					board.x = 0;
+				}
+				if(board.scaleY < toplevel.height / board.height) {
+					board.y = 0;
+				}
+					
+					
+				if(board.scaleX < toplevel.width / board.width && board.scaleY < toplevel.height / board.height) {
+					board.scaleX = board.scaleY = toplevel.width / board.width;
+					board.x = 0;
+				}					
+				
+			}
+			
+		]]>
+	</fx:Script>
+	<views:Board  id="board" width="2400" height="1350"
+				 color="0xF00000" contentBackgroundColor="#000000">
+	</views:Board>
+</s:Group>

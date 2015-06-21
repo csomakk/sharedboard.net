@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 chromeColor="#000000" color="0x000000"
+		 contentBackgroundColor="#000000"
+		 
+		 creationComplete="windowedapplication1_creationCompleteHandler(event)">
+	<fx:Script>
+		<![CDATA[
+			import mx.core.FlexGlobals;
+			import mx.core.IFlexDisplayObject;
+			import mx.core.UIComponent;
+			import mx.events.FlexEvent;
+			import mx.graphics.ImageSnapshot;
+			import mx.managers.PopUpManager;
+			
+			public var line:MovieClip = new MovieClip()
+			public var ui:UIComponent = new UIComponent()
+			public var lineX:Array = new Array();
+			public var lineY:Array = new Array();
+			public var lineStyleThickness:Number = 1;
+			public var lineStyleColor:uint = 0xFFFFFF;
+			public var currentPos:Point = new Point(0,0);
+			private var _drawn:int = 0;
+			
+			[Bindable]
+			public var smoothing:int = 2;
+			
+			private var smoothCounter:int = 0;
+			
+			private var smallMenuPopUp:IFlexDisplayObject;
+			private var longTouchTimer:Timer=new Timer(400, 0);
+			
+		 	public function get drawn():int {
+				return _drawn;
+			}
+
+			public function set drawn(value:int):void {
+				_drawn = value;
+				if(_drawn > 200){
+					redrawAsBitmap();
+					_drawn=0;
+				}
+			}
+ 
+
+			public function mouseDn(e:MouseEvent):void {
+				lineX = new Array();
+				lineY = new Array();
+				addEventListener(MouseEvent.MOUSE_MOVE, mouseMv);
+				addEventListener(MouseEvent.MOUSE_UP, mouseUp);
+				addEventListener(MouseEvent.MOUSE_OUT, mouseOut);
+				line.graphics.moveTo(e.localX, e.localY);
+				removeEventListener(MouseEvent.MOUSE_DOWN, mouseDn);
+				lineX.push(e.localX);
+				lineY.push(e.localY);
+				currentPos = new Point(e.localX, e.localY);	
+				
+				PopUpManager.removePopUp(smallMenuPopUp);
+					
+				longTouchTimer.start();
+				
+			}	
+			
+			/**
+			 * Called when board is panning or zooming
+			 */
+			public function removeDownListeners():void{
+				longTouchTimer.reset();
+				addEventListener(MouseEvent.MOUSE_DOWN, mouseDn);
+				removeEventListener(MouseEvent.MOUSE_MOVE, mouseMv);
+				removeEventListener(MouseEvent.MOUSE_UP, mouseUp);
+				removeEventListener(MouseEvent.MOUSE_OUT, mouseOut);
+				smoothCounter = 0;
+			}
+			
+			public function mouseUp(e:MouseEvent):void {
+				longTouchTimer.reset();
+				
+				line.graphics.lineTo(e.localX, e.localY);
+				lineX.push(e.localX);
+				lineY.push(e.localY);
+				
+				removeEventListener(MouseEvent.MOUSE_OUT, mouseOut);
+				removeEventListener(MouseEvent.MOUSE_MOVE, mouseMv);
+				addEventListener(MouseEvent.MOUSE_DOWN, mouseDn);
+				drawn += lineX.length;
+				smoothCounter = 0;
+				FlexGlobals.topLevelApplication.p2pConn.sendLineMessage(lineStyleThickness, lineStyleColor, lineX, lineY);
+				
+			}
+			
+			public function mouseOut(e:MouseEvent):void {
+				trace("mouseOut");
+				addEventListener(MouseEvent.MOUSE_DOWN, mouseDn);
+				removeEventListener(MouseEvent.MOUSE_MOVE, mouseMv);
+				removeEventListener(MouseEvent.MOUSE_UP, mouseUp);
+				removeEventListener(MouseEvent.MOUSE_OUT, mouseOut);
+				drawn += lineX.length;
+				smoothCounter=0;
+				FlexGlobals.topLevelApplication.p2pConn.sendLineMessage(lineStyleThickness, lineStyleColor, lineX, lineY);
+				lineX = new Array();
+				lineY = new Array();
+			}
+			
+			public function mouseMv(e:MouseEvent):void {
+				if(smoothCounter%smoothing == 0){
+					line.graphics.lineTo(e.localX, e.localY);
+					lineX.push(e.localX);
+					lineY.push(e.localY);
+					currentPos = new Point(e.localX, e.localY);
+				}
+				
+				smoothCounter++;	
+				
+			}
+			
+			protected function windowedapplication1_creationCompleteHandler(event:FlexEvent):void {
+				
+				if (flash.system.Capabilities.version.substr(0,3) == "IOS"){
+					smoothing = 1;
+					//if ios, def. smoothing is 1 due to performance
+				}
+				
+				ui.addChild(line);
+				addElement(ui);
+				//square for the mask
+				var square:Shape = new Shape();
+				square.graphics.beginFill(0xff0000);
+				square.graphics.drawRect(0, 0, width, height);
+				square.graphics.endFill();
+				ui.addChild(square);
+				line.mask=square 	
+				//mask end	
+				addEventListener(MouseEvent.MOUSE_DOWN, mouseDn)
+				addEventListener(MouseEvent.RIGHT_CLICK, smallMenuCaller)
+				resetBoard()
+				line.graphics.lineStyle(3,0xFFFFFF,1);		
+				lineStyleThickness = 3;
+				lineStyleColor = 0xFFFFFF;
+					
+				longTouchTimer.addEventListener(TimerEvent.TIMER, smallMenuCaller);	
+					
+			}
+		
+			public function setLineStyle(thickness:Number, color:Number):void {
+				line.graphics.lineStyle(thickness, color, 1);	
+				lineStyleThickness = thickness;
+				lineStyleColor = color;
+			}
+			
+			public function resetBoard():void {
+				line.graphics.clear();
+				line.graphics.beginFill(0x000000,1);
+				line.graphics.drawRect(0,0,width, height);
+				line.graphics.endFill();
+					
+				line.graphics.lineStyle(3,0x330000,1);
+				
+				line.graphics.moveTo(0,0);
+				line.graphics.lineTo(width,0);
+				line.graphics.lineTo(width,height);
+				line.graphics.lineTo(0,height);
+				line.graphics.lineTo(0,0);
+				line.graphics.lineStyle(lineStyleThickness,lineStyleColor,1); //return to users linestyle
+			}
+			
+			public function drawLine(lineThickness:Number, lineColor:Number, xes:Array, ys:Array):void {
+				line.graphics.lineStyle(lineThickness, lineColor);
+				line.graphics.moveTo(xes[0], ys[0]);
+				for(var i:Number = 1; i < xes.length; i++) {
+					line.graphics.lineTo(xes[i], ys[i]);
+				}
+	
+				line.graphics.moveTo(currentPos.x, currentPos.y); //visszamegy, ahol járt
+				line.graphics.lineStyle(lineStyleThickness,lineStyleColor,1); //return to users linestyle
+			}
+			
+			private function redrawAsBitmap():void {
+				trace("redrawAsBitmap()");
+				var g:Graphics=line.graphics;
+				var textBitmapData:BitmapData =	ImageSnapshot.captureBitmapData(this);
+				line.graphics.clear();
+				//resetBoard()
+				g.lineStyle(0,0,0);
+				g.beginBitmapFill(textBitmapData);
+				g.drawRect(0,0,textBitmapData.width,textBitmapData.height);
+				g.endFill(); 
+				g.lineStyle(lineStyleThickness, lineStyleColor); //visszaállitjuk a szint
+					
+			}
+			
+			protected function smallMenuCaller(event:Event):void {
+				
+				longTouchTimer.reset();
+				
+				if(lineX[lineX.length-1]-lineX[0]>5 || lineX[lineX.length-1]-lineX[0]>5) {
+					return; 
+				}
+				
+				removeEventListener(MouseEvent.MOUSE_MOVE, mouseMv);
+				removeEventListener(MouseEvent.MOUSE_UP, mouseUp);
+				removeEventListener(MouseEvent.MOUSE_OUT, mouseOut);
+				
+				PopUpManager.removePopUp(smallMenuPopUp);
+				
+				if(event is MouseEvent) {
+					lineX.push((event as MouseEvent).localX);
+					lineY.push((event as MouseEvent).localY);
+				}
+				
+				smallMenuPopUp = PopUpManager.createPopUp(this, smallMenu, false );
+				
+				var xx:Number = lineX[lineX.length-1];
+				var yy:Number = lineY[lineY.length-1];
+				trace(xx);
+				trace(scaleX);
+				trace(x);	
+					
+				xx = x + xx * scaleX;	
+				yy = y + yy * scaleY;	
+				trace(xx,yy);
+				
+					//ne logjon ki se fülöl, se balra, se jobbra..
+				if(xx < smallMenuPopUp.width / 2) xx = smallMenuPopUp.width / 2 //bal
+			//	if(xx+smallMenuPopUp.width/2>width) xx=width-smallMenuPopUp.width //jobb
+				if(yy < smallMenuPopUp.height / 2) yy = smallMenuPopUp.height + 50 //felül
+			//	if(yy+smallMenuPopUp.height>height) yy=height-smallMenuPopUp.height-50 //alul
+				
+				smallMenuPopUp.x = xx - smallMenuPopUp.width / 2;
+				smallMenuPopUp.y = yy - smallMenuPopUp.height - 50;
+				
+				addEventListener(MouseEvent.MOUSE_DOWN, mouseDn);
+				
+			}
+			
+		]]>
+	</fx:Script>
+</s:Group>

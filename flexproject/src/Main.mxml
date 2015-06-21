@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   creationComplete="application1_creationCompleteHandler(event)"
+			   backgroundColor="0x464646"
+			   deactivate="onDeactivateApp(event)"
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:views="views.*">
+	<fx:Script>
+		<![CDATA[
+			import connection.P2Pconnection;
+			
+			import mx.events.FlexEvent;
+			
+			public var p2pConn:P2Pconnection = new P2Pconnection()
+				
+			protected function orientationChanged(event:Event):void {
+				trace("orientationChanged");
+			}
+			
+			protected function application1_creationCompleteHandler(event:FlexEvent):void {
+				addEventListener(StageOrientationEvent.ORIENTATION_CHANGE, orientationChanged);
+			}
+			
+			protected function onDeactivateApp(event:Event):void {
+				homeView.saveSettings();
+			}
+			
+		]]>
+	</fx:Script>
+	<views:BlackBoardHome id="homeView" left="0" right="0" top="0" bottom="0"/>
+</s:Application>

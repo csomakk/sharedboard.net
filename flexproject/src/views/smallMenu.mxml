@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 width="200" height="75"
+		 alpha="0.9">
+	<fx:Script>
+		<![CDATA[
+			import mx.core.FlexGlobals;
+			import mx.managers.PopUpManager;
+			
+			protected var board:Board=FlexGlobals.topLevelApplication.homeView.boardHolder.board;
+		]]>
+	</fx:Script>
+	<s:Image x="4" y="4" width="32" height="32"
+			 click="board.setLineStyle(3,0xFFFFFF); PopUpManager.removePopUp(this)" smooth="true"
+			 source="icons/1350074132_Circle_Grey.png"/>
+	<s:Image x="4" y="39" width="32" height="32"
+			 click="board.setLineStyle(3,0xFF0000); PopUpManager.removePopUp(this)" smooth="true"
+			 source="icons/1350074113_Circle_Red.png"/>
+	<s:Image x="39" y="4" width="32" height="32"
+			 click="board.setLineStyle(3,0x00FF00); PopUpManager.removePopUp(this)" smooth="true"
+			 source="icons/1350074311_Circle_Green.png"/>
+	<s:Image x="74" y="4" width="32" height="32"
+			 click="board.setLineStyle(3,0x0000FF); PopUpManager.removePopUp(this)" smooth="true"
+			 source="icons/1350074138_Circle_Blue.png"/>
+	<s:Image x="39" y="39" width="32" height="32"
+			 click="board.setLineStyle(3,0xFFFF66); PopUpManager.removePopUp(this);" smooth="true"
+			 source="icons/1350074279_Circle_Yellow.png"/>
+	<s:Image x="75" y="41" width="32" height="32"
+			 click="board.setLineStyle(20,0x000000); PopUpManager.removePopUp(this);" smooth="true"
+			 source="icons/1314206834_Soap.png"/>
+	<s:Image id="callForBigMenu" x="110" y="6" width="89" height="65"
+			  click="PopUpManager.removePopUp(this); PopUpManager.centerPopUp(PopUpManager.createPopUp(this, menuPanel, true));"
+			  source="icons/ico_16.png"/>
+
+</s:Group>

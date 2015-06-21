@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 creationComplete="group1_creationCompleteHandler(event)"
+		 verticalCenter="0" horizontalCenter="0"
+		xmlns:s="library://ns.adobe.com/flex/spark" width="100%" height="100%" >
+	
+	<fx:Script>
+		<![CDATA[
+			
+			import mx.core.FlexGlobals;
+			import mx.core.UIComponent;
+			import mx.events.FlexEvent;
+			import mx.graphics.ImageSnapshot;
+			
+			[Bindable]
+			public var toMove:MovieClip = new MovieClip();
+			private var mc:MovieClip = new MovieClip();
+			private var resizeStartX:int;
+			private var resizeStartY:int;
+			private var resizeStartWidth:Number;
+			private var resizeStartHeight:Number;
+			private var kihuzoMC:MovieClip = new MovieClip();
+			private var moveStartX:int
+			private var moveStartY:int
+			private var board:Board=FlexGlobals.topLevelApplication.homeView.boardHolder.board
+			protected var rotator:MovieClip = new MovieClip();
+			public var c:UIComponent = new UIComponent();
+			
+			protected function group1_creationCompleteHandler(event:FlexEvent):void {
+				addElement(c)
+				c.scaleX = board.scaleX
+				c.scaleY = board.scaleY
+				c.x = board.x; 
+				c.y = board.y;
+				mc.x = 0;
+				mc.y = 0;
+				
+				kihuzoMC.x = 0;
+				kihuzoMC.y = 0;
+				kihuzoMC.graphics.beginFill(0x000000,0.0001);
+				kihuzoMC.graphics.drawRect(0,0,1,1000);
+				kihuzoMC.graphics.drawRect(0,0,500,1);
+				mc.addChild(kihuzoMC);
+				
+				c.addChild(mc);
+				
+				
+				trace("sc: ", mc.scaleX);
+				rotator = new MovieClip();
+				mc.addChild(rotator);
+				toMove.x = -toMove.width / 2;
+				toMove.y = -toMove.height / 2;
+				rotator.addChild(toMove);
+				rotator.x = 200-c.x;
+				rotator.y = 100-c.y;
+				toMove.addEventListener(MouseEvent.MOUSE_DOWN, moveBtnDragStart);
+				rotateBtn.addEventListener(MouseEvent.MOUSE_DOWN, rotateBtnDragStart);
+				resizeBtn.addEventListener(MouseEvent.MOUSE_DOWN, resizeBtnDragStart);
+		
+				resizeStartHeight = toMove.height;
+				resizeStartWidth = toMove.width;
+				
+				upDateButtonPoses();
+				
+				addEventListener( TransformGestureEvent.GESTURE_ZOOM, onGesture );
+				addEventListener( TransformGestureEvent.GESTURE_ROTATE, onGesture );
+				
+			}
+			
+			private function onGesture( event : TransformGestureEvent ) : void {
+				//trace( event.type, event.rotation, event.scaleX, event.scaleY, width, height );
+				if ( event.type == TransformGestureEvent.GESTURE_ROTATE ) {
+					rotator.rotationZ += event.rotation;
+				} else 	if ( event.type == TransformGestureEvent.GESTURE_PAN ) {
+					toMove.currentTarget.x += event.offsetX;
+					toMove.currentTarget.y += event.offsetY;
+				} else {
+					toMove.scaleX  *=  event.scaleX//*resizeStartWidth
+					toMove.scaleY *= event.scaleY//*resizeStartHeight
+					toMove.x = -toMove.width / 2
+					toMove.y = -toMove.height / 2	
+				}
+			}
+			
+			protected function okBtn_clickHandler(event:MouseEvent):void {
+				//http://cookbooks.adobe.com/post_Adding_text_to_flash_display_Graphics_instance-14246.html
+				
+				busyIndicator.visible=true; //visszajelzés a töltésről
+				okBtn.enabled=false;
+				okBtn.visible=false;
+				
+				var t:Timer=new Timer(1000/24, 1);
+				t.addEventListener(TimerEvent.TIMER, okTimerEvent);
+				t.start();
+				trace("timerstarted")
+				
+			}
+			
+			
+			protected function okTimerEvent(e:Event):void{
+				trace("okTimer")
+				var g:Graphics=FlexGlobals.topLevelApplication.homeView.boardHolder.board.line.graphics
+				var textBitmapData:BitmapData =	ImageSnapshot.captureBitmapData(mc);
+				//textBitmapData
+				
+				g.lineStyle(0,0,0);
+				
+				g.moveTo(0,0)
+				
+				g.beginBitmapFill(textBitmapData);
+				g.drawRect(0,0,textBitmapData.width,textBitmapData.height);
+				g.endFill(); 
+				
+				g.lineStyle(FlexGlobals.topLevelApplication.homeView.boardHolder.board.lineStyleThickness,
+					FlexGlobals.topLevelApplication.homeView.boardHolder.board.lineStyleColor) //visszaállitjuk a szint
+				
+				FlexGlobals.topLevelApplication.p2pConn.sendBitmapMessage(
+					textBitmapData, 0,0, textBitmapData.width, textBitmapData.height)
+				//send p2p msg, kell: bitmapdata, x, y, width, height de lehet hogy elég csak a bitmapdata
+				
+				var par:Group=parent as Group
+				par.removeElement(this)
+			}
+			
+			
+			protected function moveBtnDragStart(event:MouseEvent):void {
+				moveStartX=event.stageX-rotator.x
+				moveStartY=event.stageY-rotator.y
+				addEventListener(MouseEvent.MOUSE_MOVE, moveBtnMove)
+				addEventListener(MouseEvent.MOUSE_UP, moveBtnMouseUp);
+			}
+			
+			protected function moveBtnMouseUp(event:MouseEvent):void {
+				removeEventListener(MouseEvent.MOUSE_MOVE, moveBtnMove)
+				removeEventListener(MouseEvent.MOUSE_UP, moveBtnMouseUp);
+			}
+			
+			protected function moveBtnMove(event:MouseEvent):void {
+				//if(toMove.width < 600 && toMove.height < 300){
+				rotator.x = event.stageX - moveStartX;
+				rotator.y = event.stageY - moveStartY;
+				upDateButtonPoses()
+				//}
+			}
+			
+			public function upDateButtonPoses():void {
+				if(Multitouch.supportsGestureEvents){
+					rotateBtn.visible=false;
+					resizeBtn.visible=false;
+				} else {
+					toMove.x = -toMove.width/2;
+					toMove.y = -toMove.height/2;
+					rotateBtn.x = (c.x+mc.x+rotator.x+toMove.width/2)*c.scaleX+10
+					//if(rotateBtn.x<width/2) rotateBtn.x=width/2
+					rotateBtn.y = (c.y+mc.y+rotator.y-toMove.height/2)*c.scaleX-10
+					resizeBtn.x = rotateBtn.x
+					//if(resizeBtn.x<width/2) resizeBtn.x=width/2
+					resizeBtn.y = (c.y+mc.y+rotator.y+toMove.height/2)*c.scaleX+10
+				}
+			}
+			
+			
+			
+			protected function rotateBtnDragStart(event:MouseEvent):void {
+				addEventListener(MouseEvent.MOUSE_MOVE, rotateBtnMove);
+				addEventListener(MouseEvent.MOUSE_UP, rotateBtnMouseUp);
+			}
+			
+			protected function rotateBtnMove(event:MouseEvent):void {
+				var xdir:Number = event.stageX - rotator.x - toMove.width / 2;
+				var ydir:Number = event.stageY - rotator.y - toMove.height / 2;
+				rotator.rotationZ = -Math.atan2(xdir, ydir) * 360 / (2 * Math.PI) + 135;
+				upDateButtonPoses();
+			}
+			
+			protected function rotateBtnMouseUp(event:MouseEvent):void {
+				removeEventListener(MouseEvent.MOUSE_MOVE, rotateBtnMove);
+				removeEventListener(MouseEvent.MOUSE_UP, rotateBtnMouseUp);
+								
+				upDateButtonPoses();
+			}
+			
+			protected function resizeBtnDragStart(event:MouseEvent):void {
+				addEventListener(MouseEvent.MOUSE_MOVE, resizeBtnMove);
+				addEventListener(MouseEvent.MOUSE_UP, resizeBtnMouseUp);
+				resizeStartX=event.stageX;
+				resizeStartY=event.stageY;
+				resizeStartHeight=toMove.height;
+				resizeStartWidth=toMove.width;
+			}
+			
+			protected function resizeBtnMove(event:MouseEvent):void {
+				toMove.width  = (event.stageX-resizeStartX)+resizeStartWidth;
+				toMove.height = (event.stageY-resizeStartY)+resizeStartHeight;
+				toMove.x=-toMove.width/2;
+				toMove.y=-toMove.height/2;
+				upDateButtonPoses();
+			}
+			
+			protected function resizeBtnMouseUp(event:MouseEvent):void {
+				removeEventListener(MouseEvent.MOUSE_MOVE, resizeBtnMove);
+				removeEventListener(MouseEvent.MOUSE_UP, resizeBtnMouseUp);
+			}
+			
+			protected function cancelBtn_clickHandler(event:MouseEvent):void {
+				(parent as Group).removeElement(this)
+			}
+			
+			protected function strechBtn_clickHandler(event:MouseEvent):void {
+				toMove.width = parent.width;
+				toMove.height = parent.height;
+				rotator.x = 500;
+				rotator.y = 250;
+				upDateButtonPoses();
+			}
+			
+		]]>
+	</fx:Script>
+	<s:Button id="okBtn" right="10" bottom="10" width="30%" height="10%" label="OK"
+			  click="okBtn_clickHandler(event)"/>
+	
+	<s:Button id="rotateBtn" x="207" y="327" width="32" height="32"
+			  icon="icons/1309428967_stock_rotate.png"/>
+	<s:Button id="resizeBtn" x="207" y="261" width="32" height="32"
+			  icon="icons/1309428442_insert-text.png"/>
+	<s:Button left="10" bottom="10" width="10%" height="10%" label="Cancel"
+			  click="cancelBtn_clickHandler(event)"/>
+	<s:BusyIndicator id="busyIndicator" visible="false" right="107" bottom="10" width="95"
+					 height="88" rotationInterval="100"/>
+	<s:Button id="strechBtn" bottom="10" y="531" width="20%" height="10%" label="Stretch"
+			  click="strechBtn_clickHandler(event)" horizontalCenter="0"/>
+	
+</s:Group>

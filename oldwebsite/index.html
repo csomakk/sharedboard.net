@@ -1,0 +1,190 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+
+<title>Shared Board App</title>
+
+<meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />
+<meta name="author" content="Erwin Aligam - styleshout.com" />
+<meta name="description" content="Site Description Here" />
+<meta name="keywords" content="keywords, here" />
+<meta name="robots" content="index, follow, noarchive" />
+<meta name="googlebot" content="noarchive" />
+
+<link rel="stylesheet" type="text/css" media="screen" href="css/screen.css" />
+<script>
+
+// Script Source: CodeLifter.com
+// Copyright 2003
+// Do not remove this notice.
+
+// SETUPS:
+// ===============================
+
+// Set the horizontal and vertical position for the popup
+
+PositionX = 100;
+PositionY = 100;
+
+// Set these value approximately 20 pixels greater than the
+// size of the largest image to be used (needed for Netscape)
+
+defaultWidth  = 500;
+defaultHeight = 500;
+
+// Set autoclose true to have the window close automatically
+// Set autoclose false to allow multiple popup windows
+
+var AutoClose = true;
+
+// Do not edit below this line...
+// ================================
+if (parseInt(navigator.appVersion.charAt(0))>=4){
+var isNN=(navigator.appName=="Netscape")?1:0;
+var isIE=(navigator.appName.indexOf("Microsoft")!=-1)?1:0;}
+var optNN='scrollbars=no,width='+defaultWidth+',height='+defaultHeight+',left='+PositionX+',top='+PositionY;
+var optIE='scrollbars=no,width=150,height=100,left='+PositionX+',top='+PositionY;
+function popImage(imageURL,imageTitle){
+if (isNN){imgWin=window.open('about:blank','',optNN);}
+if (isIE){imgWin=window.open('about:blank','',optIE);}
+with (imgWin.document){
+writeln('<html><head><title>Loading...</title><style>body{margin:0px;}</style>');writeln('<sc'+'ript>');
+writeln('var isNN,isIE;');writeln('if (parseInt(navigator.appVersion.charAt(0))>=4){');
+writeln('isNN=(navigator.appName=="Netscape")?1:0;');writeln('isIE=(navigator.appName.indexOf("Microsoft")!=-1)?1:0;}');
+writeln('function reSizeToImage(){');writeln('if (isIE){');writeln('window.resizeTo(300,300);');
+writeln('width=300-(document.body.clientWidth-document.images[0].width);');
+writeln('height=300-(document.body.clientHeight-document.images[0].height);');
+writeln('window.resizeTo(width,height);}');writeln('if (isNN){');       
+writeln('window.innerWidth=document.images["George"].width;');writeln('window.innerHeight=document.images["George"].height;}}');
+writeln('function doTitle(){document.title="'+imageTitle+'";}');writeln('</sc'+'ript>');
+if (!AutoClose) writeln('</head><body bgcolor=000000 scroll="no" onload="reSizeToImage();doTitle();self.focus()">')
+else writeln('</head><body bgcolor=000000 scroll="no" onload="reSizeToImage();doTitle();self.focus()" onblur="self.close()">');
+writeln('<img name="George" src='+imageURL+' style="display:block"></body></html>');
+close();		
+}}
+
+</script>
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-6132321-5']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+</head>
+
+<body>
+
+<!--header -->
+<div id="header-wrap"><div id="header">
+
+	<a name="top"></a>
+
+	<h1 id="logo-text"><a href="index.html" title="">Shared Board</a></h1>
+	<p id="slogan">There are things you can't write down. Create. Collaborate. Share.</p>
+
+	<!--/header-->
+</div></div>
+	
+<!-- content-outer -->
+<div id="content-wrap" class="clear" >
+
+	<!-- content -->
+   <div id="content">
+
+   	<!-- main -->
+	   <div id="main">
+
+      	<div class="post">
+
+      		<div class="right">
+
+            	<h2>MultiPlatform!</h2>
+
+               <p class="post-info">iPad, Mac, Windows, Linux, Android, BlackBerry PlayBook</p>
+              <blockquote> 
+                <h4><a href="download.html">Download Shared Board now!</a></h4>
+              </blockquote>
+<p>&nbsp;</p>
+<h2>Video</h2>
+<iframe width="480" height="360" src="http://www.youtube.com/embed/FqLmLC8s3Y4?rel=0" frameborder="0" allowfullscreen></iframe>
+<h2>Awards</h2>
+<p class="post-info">Shared Board won The SPECIAL 12 prize at <a href="http://www.adobemobilechallenge.com/" class="comment">Adobe Mobile Challenge</a></p>
+<p class="post-info"><img src="adobemobile3.PNG" alt="" width="324" height="264" /></p>
+<p class="post-info"><img src="adobemobile.PNG" alt="" width="612" height="97" /></p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<h2>What is Shared Board?</h2>
+<p>Draw anything, and your partners viewing that board will instantly see it. The main purpose is to educate through Internet, but can be used in many ways. Share ideas while sketching!<br />
+</p>
+<p> Essentially a shared white board, it allows you to open a group room so anyone who is in that group can contribute their suggestions visually on the white board screen. Each user who attends the group has the ability to mark up the screen as well as send chat messages. You are able to select your marker color, sponge (erase) and add text. You can add an image or take a photo and use it as the background image on the screen. Once you are finished, everyone can save the board as an image.<br />
+</p>
+<p>&nbsp;</p>
+<h2>Contact</h2>
+<p>Bug reports, feature ideas, comments, questions are welcome to <a href="mailto:csomak@sharedboard.net">csomak@sharedboard.net</a>! Please tell me how, and why are you using Shared Board!</p>
+<p>&nbsp;</p>
+<h2>&nbsp;</h2>
+<h2>&nbsp;</h2>
+<h2>FAQs:</h2>
+<p><strong>I cannot connect/cannot see anyone. Why?</strong></p>
+<p>Unfortunately -as it is a P2P app- some firewalls block the connection. Make sure that no firewall is banning the ports 50.57.90.134 <strong>:1935</strong> and 
+  192.168.56.1 <strong>:54305</strong>. Remember to give the same group name on every device you want to connect, and the server will connect you. </p>
+<p><strong>How to change color and size?</strong><br /> 
+You can <em>long-press</em> or right-click for the small menu. You can Swipe_down on playbook, or use the small menu to get the full menu. There is a custom color icon, and there you can change size, and select the color you want in RGB.</p>
+<p><strong>What about security?</strong><br />
+  Because passwords can be stolen, forgotten, or cracked easily by an expert, I've decided not to bother with them. Instead, you can view, how many people can actually see the conversation. It is marked as an approximation, but under 5 it is perfectly accurate. However, a good hacker can still trick the system. Remember, if someone joins, he/she won't see the previously drawn and sent messages, only a clean, black board.</p>
+<p><strong>How does it work? </strong><br />
+  The program is written in Adobe Flex (yes, it runs on Adobe Flash platform, even on iOS), complied from the same project for each target platforms. The connection is 'centralised peer-to-peer', so when you enter a group name, it will ask the Adobe Cirrus server for the participiants in the group, and from then, you only connect via p2p.</p>
+<p>&nbsp;</p>
+<h2>About the author</h2>
+<p>Gábor Csomák, 21, is a student at TU Budapest, editor of <a href="http://www.ffdmag.com" target="_blank">ffdmag.com</a>, programmer of <a href="http://frt.bme.hu" target="_blank">TU Budapest Formula Racing Team</a>, and rugby player at Budapest Bears. <br />
+          </p>
+</div>
+      	</div>
+
+      	<!-- /main -->
+		</div>
+
+      <!-- sidebar -->
+		<div id="sidebar"><!-- /sidebar -->
+		  <p><a href="http://twitter.com/#!/csomak" target="_new"><img src="1313494674_twitter_10.png" alt="" width="128" height="128" align="baseline" /></a></p>
+		  <h2>On the web:</h2>
+		  <p><a href="http://bit.ly/q8OJhK">Inside BlackBerry for Business Blog<br />
+		  </a><a href="http://bit.ly/nepNox" target="_blank">BlackBerry Empire on v1.0.0</a><br />
+	      <a href="http://bit.ly/qStVgK" target="_blank">BBerry Appworld Reviews </a></p>
+<h2>Screenshots:		  </h2>
+		  <p><a href="https://plus.google.com/photos/102055112376634981367/albums/5631728473361068353" target="_blank"><img src="screenshots/sc5_r.png" alt="" width="205" height="121" /></a></p>
+		  <h2>Buy me a beer!</h2>
+          <p>If you like my app please donate me a few dollars.</p>
+          <form action="https://www.paypal.com/cgi-bin/webscr" method="post">
+            <input type="hidden" name="cmd" value="_s-xclick" />
+            <input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----
+" />
+            <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!" />
+            <img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1" />
+          </form>
+          <p>&nbsp;</p>
+        </div>
+
+    <!-- content -->
+	</div>
+
+<!-- /content-out -->
+</div>
+		
+<!-- footer-outer -->
+<div id="footer-outer" class="clear">
+  <div id="footer-wrap"></div></div>
+
+<!-- footer-bottom -->
+</body>
+</html>

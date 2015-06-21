@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Panel xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 
+		 creationComplete="panel1_creationCompleteHandler(event)"
+		 width="540" height="374" backgroundColor="0x464646" title="Connect to a group">
+	<fx:Script>
+		<![CDATA[
+			import CsUtils.CsUtils;
+			
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			
+			protected function goOnlineBtn_clickHandler(event:MouseEvent):void {
+				FlexGlobals.topLevelApplication.homeView.boardHolder.board.resetBoard() //ha relogin van, tisztával kezdődjön
+				FlexGlobals.topLevelApplication.p2pConn.connect(groupInput.text,nameInput.text)
+				PopUpManager.removePopUp(this)
+					
+				var xml:XML=new XML(
+								"<infos>"+
+									"<name>"+nameInput.text+"</name>"+
+									"<group>"+groupInput.text+"</group>"+
+								"</infos>")
+					
+				new CsUtils().saveAsXML(xml, File.applicationStorageDirectory.resolvePath("login.xml").nativePath)
+			}
+			
+			protected function offlineBtn_clickHandler(event:MouseEvent):void {
+				PopUpManager.removePopUp(this)
+				FlexGlobals.topLevelApplication.p2pConn.disconnect()
+			}
+			
+			
+			protected function helpBtn_clickHandler(event:MouseEvent):void {
+				//create and center help panel
+				PopUpManager.centerPopUp(PopUpManager.createPopUp(this, helpPanel, true))
+			}
+			
+			protected function panel1_creationCompleteHandler(event:FlexEvent):void {
+				var xml:XML=new CsUtils().loadXML(File.applicationStorageDirectory.resolvePath("login.xml").nativePath)
+				var xmll:XMLList=xml.children()
+				nameInput.text=xmll[0]
+				groupInput.text=xmll[1]
+				
+				width=stage.stageWidth;
+				height=stage.stageHeight
+				
+			}
+			
+		]]>
+	</fx:Script>
+
+	
+	
+	
+	<s:VGroup left="10" right="10" top="10" bottom="10">
+		<s:HGroup left="10" right="10" top="10" width="100%">
+			<s:VGroup x="10" y="10" width="100%">
+				<s:HGroup width="100%">
+					<s:Label height="100%" color="#FFFFFF" text="Name" verticalAlign="middle"/>
+					<s:TextInput id="nameInput" width="100%"/>
+				</s:HGroup>
+				<s:HGroup width="100%">
+					<s:Label height="100%" color="#FFFFFF" text="Group" verticalAlign="middle"/>
+					<s:TextInput id="groupInput" width="100%"/>
+				</s:HGroup>
+			</s:VGroup>
+			<s:VGroup>
+				<s:Button width="100%" height="65%" label="Go Online!"
+						  click="goOnlineBtn_clickHandler(event)"/>
+				<s:Button width="100%" height="30%" label="Offline"
+						  click="offlineBtn_clickHandler(event)"/>
+			</s:VGroup>
+		</s:HGroup>
+		<s:Label left="10" right="10" top="98" width="100%" color="#E3E3E3" fontFamily="_sans"
+				 fontWeight="bold"
+				 text="This app uses  internet connection!          &#xd;Possible exposure due to communicating with others!"
+				 textAlign="center" verticalAlign="middle"/>
+		<s:Label left="10" right="10" top="152" bottom="55" width="100%" height="100%"
+				 color="#DBDBDB" fontFamily="_sans"
+				 text="If you're unsure about your Internet pricing, please do not use it! &#xd;By using the app, you are accepting terms of service.&#xd;To collaborate with others, just give the same group name. &#xd;Anyone can join any group, so you should give it a rare name. "
+				 textAlign="center" verticalAlign="middle"/>
+		<s:Button left="10" right="10" bottom="10" width="100%" label="Help and terms of service"
+				  click="helpBtn_clickHandler(event)"/>
+	</s:VGroup>
+	
+	<s:Image right="0" top="-30" width="30" height="30" click="PopUpManager.removePopUp(this);"
+			 smooth="true" source="icons/1314286165_button_red_close.png"/>
+</s:Panel>

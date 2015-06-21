@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Panel xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 width="626" height="300" title="Update notes">
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.managers.PopUpManager;
+			protected function button1_clickHandler(event:MouseEvent):void {
+				PopUpManager.removePopUp(this);
+			}
+		]]>
+	</fx:Script>
+	
+	<s:Button bottom="10" width="299" label="OK" click="button1_clickHandler(event)" horizontalCenter="0"/>
+	<s:Label left="10" right="10" top="10" height="196"
+			 text="Hi!&#xd;Thanks for using my app. Shared Board went through the biggest update in its history, hope you'll enjoy it!&#xd;First of all, we have a website: www.sharedboard.net, where you're able to download the desktop version for free!&#xd;Secondly, the iPad app is submitted to AppStore and Android Market. &#xd;Thirdly, you can now insert pictures and text to the board.&#xd;&#xd;Gábor Csomák&#xd;@csomak, csomak@sharedboard.net"/>
+	<s:Button right="-3" top="-33" width="39" height="35" label="X"
+			  click="button1_clickHandler(event)"/>
+
+</s:Panel>

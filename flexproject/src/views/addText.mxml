@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Panel xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 width="320" height="320" creationComplete="group1_creationCompleteHandler(event)"
+		 title="Pick color and size">
+	<fx:Script>
+		<![CDATA[
+		
+			import mx.core.FlexGlobals;
+			import mx.core.UITextField;
+			import mx.events.FlexEvent;
+			import mx.graphics.ImageSnapshot;
+			import mx.managers.PopUpManager;
+			
+			import spark.primitives.Graphic;
+			[Bindable] 
+			private var colorValue:uint; //var used color in this class
+			
+			/** Utility to account for values that are 0-15 being one character and compensate 
+			 * without this, 15 returns "f", hence 15, 15, 15 would be "fff" instead of 0f0f0f
+			 */
+			private function toLongHexColor(s:String):String {
+				var str:String = s; 
+				if (str.length < 2) { 
+					str = "0" + str; 
+				}
+				return str; 
+			} 
+			
+			private function setColor():void { 
+				var R:String = (rSlider.value).toString(16);
+				var G:String = (gSlider.value).toString(16);
+				var B:String = (bSlider.value).toString(16);
+				
+				var newColor:String = newColor = "0x" + toLongHexColor(R) + toLongHexColor(G) + toLongHexColor(B); 
+				
+				colorValue = parseInt(newColor,16); 
+			} 
+			
+
+			protected function group1_creationCompleteHandler(event:FlexEvent):void {
+				colorValue=FlexGlobals.topLevelApplication.homeView.boardHolder.board.lineStyleColor;
+				rSlider.value=(( colorValue >> 16 ) & 0xFF);//r
+				gSlider.value=((colorValue >> 8) & 0xFF );//g
+				bSlider.value=( colorValue & 0xFF );//b
+				focusManager.setFocus(textInput);
+				
+				y = 50; //leave space to virtual keyboards
+				
+				width = stage.stageWidth;
+				height = stage.stageHeight;
+				if(stage.stageWidth > 500){
+					width *= 0.8;
+					height *= 0.8;
+				}
+			}
+			
+			protected function onOKBtnClick(event:MouseEvent):void {
+				setColor();
+				var uit:UITextField = new UITextField();
+				uit.text = textInput.text;
+				var textformat:TextFormat = new TextFormat()
+				textformat.color = colorValue
+				textformat.size = 36
+				uit.setTextFormat(textformat);
+				uit.autoSize = TextFieldAutoSize.LEFT;
+				var visCompHand:visualComponentHandler = new visualComponentHandler()
+				FlexGlobals.topLevelApplication.homeView.addElement(visCompHand);
+				visCompHand.toMove.addChild(uit);
+				visCompHand.upDateButtonPoses();
+				
+				PopUpManager.removePopUp(this);
+			}
+			
+			protected function textInput_keyDownHandler(event:KeyboardEvent):void {
+				if(event.keyCode == Keyboard.ENTER) {
+					onOKBtnClick(null);
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	<!-- The following has been set to lay out properly in both landscape and portrait orientations -->
+	<!--This is only to give a visual of the color being mixed-->
+	<!--RED-->
+	<s:Label left="15" top="139" width="63" height="30" fontSize="19" text="Red" textAlign="left" verticalAlign="middle"/>
+	<s:HSlider id="rSlider" left="85" right="15" top="139" height="30" change="setColor()" maximum="254" minimum="0" stepSize="1"/>
+	<!--GREEN-->
+	<s:Label left="15" top="194" width="63" height="30" fontSize="19" text="Green" textAlign="left" verticalAlign="middle"/>
+	<s:HSlider id="gSlider" left="85" right="15" top="194" height="30" change="setColor()" maximum="254" minimum="0" stepSize="1"/>
+	<!--BLUE-->
+	<s:Label left="15" top="249" width="63" height="30" fontSize="19" text="Blue" textAlign="left" verticalAlign="middle"/>
+	<s:HSlider id="bSlider" left="85" right="15" top="249" height="30" change="setColor()" maximum="254" minimum="0" stepSize="1"/>
+	<!--ALPHA, SIZE-->
+	<s:TextInput id="textInput" keyDown="textInput_keyDownHandler(event)" y="10" left="10" right="92" height="104" color="{colorValue}"
+				 contentBackgroundColor="{0xFFFFFF ^ colorValue}" contentBackgroundAlpha="0.33" fontSize="36"/>
+	<s:Button y="10" right="10" width="74" height="104" label="OK"
+			  click="onOKBtnClick(event)"/>
+	<!-- TOP RECT-->
+	<s:Image right="0" top="-30" width="30" height="30" click="PopUpManager.removePopUp(this)"
+			 smooth="true" source="icons/1314286165_button_red_close.png"/>
+	
+</s:Panel>

@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:local="*"
+		 xmlns:views="views.*"
+		 addedToStage="view1_creationCompleteHandler(event)" fontSize="20">
+	<fx:Script>
+		<![CDATA[
+			import CsUtils.CsUtils;
+			
+			import flash.display.*;
+			
+			import mx.core.*;
+			import mx.events.ResizeEvent;
+			import mx.managers.*;
+			
+			import qnx.*;
+			
+			import spark.events.TextOperationEvent;
+		
+			private function deviceIsPlaybook():void {
+				
+				//FlexGlobals.topLevelApplication.addEventListener("swipeDown", swipeDown);
+				//////////////!!!!!!!!!!!!!!!!!!!!!toggle when releasing to Blackberry!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!////////////////////////
+				//QNXApplication.qnxApplication.addEventListener(QNXApplicationEvent.SWIPE_DOWN, swipeDown);//errort dob :S
+				
+			}
+			
+			public function scrollChatToTop():void {
+				recieve.scrollToRange(recieve.text.length);
+			}
+			
+			protected function recieve_changeHandler(event:TextOperationEvent):void {
+				scrollChatToTop();
+			}
+			
+			public function setNumberOfPeopleInGroup(to:Number):void{
+				groupNum.text = String(to);
+				var approxString:String = "";
+				if(to > 5) {
+					approxString="approximately "
+				}
+				if(to == 0) {
+					groupInfoTextArea.text="you are offline, but you can draw for your self!"
+				} else {
+					groupInfoTextArea.text="There are "+approxString+to+" people in the group "+FlexGlobals.topLevelApplication.p2pConn.groupNameStr
+				}
+					
+			}
+			
+			public function sendChatMessage(text:String):void {
+				recieve.text=text+"\n"+recieve.text;	
+			}
+			
+			public function saveSettings():void{
+				var xml:XML=new XML(
+					"<infos>"+
+					"<firstRun>false</firstRun>"+
+					"<fontSize>"+recieve.getStyle("fontSize")+"</fontSize>"+
+					"</infos>")
+				new CsUtils().saveAsXML(xml, File.applicationStorageDirectory.nativePath+"\\appSettings.xml")	
+			}
+			
+			/**
+			 * kb Konstruktor. sokminden történik. betöltjük a settings.xml-t, létrehozunk egy login PopUp-ot, 
+			 * és a device specifikus dolgokat is itt különitjük el (pl androidon menü gomb, stb..), figyelünk a 
+			 * billentyűkre, stb..
+			 */
+			protected function view1_creationCompleteHandler(event:Event):void {
+				
+				addEventListener(ResizeEvent.RESIZE, toggleFooter);
+				var lp:loginPanel = new loginPanel(); 
+				
+			/* 	lp.width=FlexGlobals.topLevelApplication.stage.width;
+				lp.height=FlexGlobals.topLevelApplication.stage.height; */
+				//addElement(lp);
+				PopUpManager.addPopUp(lp, this);
+				
+				//addEventListener(KeyboardEvent.KEY_DOWN, _onKeyDown);
+				//FlexGlobals.topLevelApplication.addEventListener(KeyboardEvent.KEY_DOWN, _onKeyDown)
+				try {
+					FlexGlobals.topLevelApplication.stage.addEventListener(KeyboardEvent.KEY_DOWN, _onKeyDown)
+				} catch(error:Error) {
+					trace("BlackBoardHome: Catched addeventlistener error", error);
+					boardHolder.addEventListener(KeyboardEvent.KEY_DOWN, _onKeyDown)
+					FlexGlobals.topLevelApplication.addEventListener(KeyboardEvent.KEY_DOWN, _onKeyDown)
+						
+				}
+				
+				deviceSpecific();
+				
+				var xml:XML = new CsUtils().loadXML(File.applicationStorageDirectory.resolvePath("settings.xml").nativePath);
+				var xmll:XMLList = xml.children();
+				if(xmll[0] > 3){
+					recieve.setStyle("fontSize", xmll[0])//chat font size
+				}
+				else if(flash.system.Capabilities.version.substr(0,3) == "IOS") {
+					recieve.setStyle("fontSize", 14) 
+				}
+
+				if(flash.system.Capabilities.version.substr(0,3) == "IOS") {
+					groupInfoTextArea.setStyle("fontSize", 14) //iphone4
+				}
+					
+				toggleFooter();
+				
+			}
+			
+			protected function deviceSpecific():void{
+				if (flash.system.Capabilities.version.substr(0,3) == "IOS") {   //available: WIN, MAC, UNIX, AND
+					//iOS
+					sendChatMessage("You can long tap to access the menu")
+					trace("device recognised as iOS device")
+				} else if (flash.system.Capabilities.version.substr(0,3) == "QNX"){  
+					//Blackberry
+					trace("device recognised as PlayBook")
+					sendChatMessage("If you have questions, ask them on SharedBoard.net");
+					sendChatMessage("You can long tap access the menu");
+					try {
+						deviceIsPlaybook()
+					} catch(error:Error) {
+						//no its not
+					}
+					
+				} else if (flash.system.Capabilities.version.substr(0,3) == "AND"){
+					//Android
+					
+					sendChatMessage("Shared Board is available for iPad and iPhone as well!")
+					sendChatMessage("You can long tap access the menu")
+					trace("device recognised as Android device")
+						//listen for menu key elsewhere!
+					
+				} else {
+					//Desktop
+					sendChatMessage("You can right click, or longclick to access the menu")
+					trace("device recognised as desktop")
+				}
+			}
+			
+			/**
+			 * Listen to BlackBerry Playbook Swipe Down event.
+			 */
+			protected function swipeDown(event:Event):void {
+				//swipe_down blackberry-n
+				createMenuPopup(null);
+			}
+			
+			public function showChatPanel(text:String=""):void{
+				if(FlexGlobals.topLevelApplication.p2pConn.estimatedPeopleCount > 0) {
+				
+					var chatPanelInstance:chatPanel=PopUpManager.createPopUp(this, chatPanel, true)	 as chatPanel
+											
+					chatPanelInstance.width=stage.width-15;
+					if(stage.width > 500){
+						chatPanelInstance.width *= 0.8;
+					}
+					
+					PopUpManager.centerPopUp(chatPanelInstance);
+					chatPanelInstance.y = 100
+					
+					focusManager.setFocus(chatPanelInstance.chatInput);
+					chatPanelInstance.chatInput.text = text;
+				}
+			}
+			
+			protected function createMenuPopup(e:Event):void {
+				PopUpManager.centerPopUp(PopUpManager.createPopUp(this, menuPanel, true));
+			}
+			
+			protected function _onKeyDown(event:KeyboardEvent):void {
+				
+				if (event.keyCode == Keyboard.MENU) {
+					createMenuPopup(null)
+				}
+				if (event.keyCode == Keyboard.M) {
+					createMenuPopup(null)
+				}
+				if (event.keyCode == Keyboard.ENTER) {
+					showChatPanel();
+				}
+				if (event.keyCode == Keyboard.C) {
+					showChatPanel();
+				}
+			
+				if (event.keyCode == Keyboard.T) {
+					PopUpManager.centerPopUp(PopUpManager.createPopUp(this, addText, true));
+				}
+				
+			}
+			
+			protected function createLoginPopup():void {
+				PopUpManager.centerPopUp(PopUpManager.createPopUp(this, loginPanel, true));
+			}
+			
+			protected function groupInfo_clickHandler(event:MouseEvent):void {
+				createLoginPopup();
+			}
+			
+			protected function showFooter(event:MouseEvent = null):void {
+				footerGroup.height = 100;
+				groupNum.visible = false;
+				boardHolder.width = width - 20;
+				boardHolder.x = 10;
+				boardHolder.y = 10;
+				boardHolder.height = height - 10 - footerGroup.height
+			}
+			
+			protected function hideFooter(event:MouseEvent = null):void {
+				footerGroup.height = 0;
+				groupNum.visible = true;
+				boardHolder.width = width - 20;
+				boardHolder.x = 10;
+				boardHolder.y = 10;
+				boardHolder.height = height - 10 - footerGroup.height;
+			}
+			
+			protected function toggleFooter(event:ResizeEvent = null):void {
+				if(groupNum.visible) {
+					hideFooter();
+				} else {
+					showFooter();
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:VGroup right="0" top="0" bottom="0" left="0">
+		<views:BoardHolder id="boardHolder" width="400" height="300" />
+	
+		<s:Group id="footerGroup" left="10" right="10" bottom="0" width="100%" height="100">
+			<s:TextArea id="recieve" left="10" right="155" top="10" bottom="0" 
+						change="recieve_changeHandler(event)" click="showChatPanel()" color="#E0E0E0"
+						contentBackgroundColor="#292929" editable="false" fontFamily="Arial"
+						fontSize="20" />
+			<s:Image right="10" top="10" bottom="0" width="52" click="hideFooter(event)"
+					 scaleMode="letterbox" smooth="false" source="icons/1314282093_scroll down.png" />
+			<s:TextArea id="groupInfoTextArea" right="70" top="10" bottom="0" width="77"
+						click="PopUpManager.centerPopUp(PopUpManager.createPopUp(this, loginPanel, true));"
+						color="#E0E0E0" contentBackgroundColor="#292929" editable="false"
+						fontFamily="Arial" text="tap to login"/>
+		</s:Group>
+	</s:VGroup>
+	<s:TextInput editable="false" click="showFooter(event)" id="groupNum" visible="false" right="10" bottom="10" width="41"
+				 color="#000000" text="0" textAlign="center"/>
+</s:Group>

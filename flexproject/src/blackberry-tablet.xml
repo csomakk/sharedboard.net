@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<qnx>
+   <permission>access_internet</permission>
+   <permission>read_device_identifying_information</permission>
+   <permission>access_shared</permission>
+   <permission>use_camera</permission>
+   <permission>play_audio</permission>
+   <permission>post_notification</permission>
+</qnx>
